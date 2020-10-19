@@ -6,16 +6,19 @@ function my_admin_menu() {
 }
 
 function lwmedia_admin_page(){
-
-
     if (isset($_POST['lwmedia-save-options']) && check_admin_referer('lwmedia-save-options')) {
-       
-        update_fobidden_metafields($_POST['forbidden_fields']);
+        update_post_meta( $_POST['membership_id'], '_forbidden_metafields', $_POST['forbidden_fields']  );
+  
 
     }
     if (isset($_POST['lwmedia-save-memberships-options']) && check_admin_referer('lwmedia-save-memberships-options')) {
-  
-        update_memberships($_POST['memberschips']);
+  var_dump($_POST);
+  $options_array = array();
+  $options_array['text_field'] = $_POST['text_field'];
+  $options_array['redirect_url'] = $_POST['redirect_url'];
+  $options_array['membership_access'] = $_POST['membership_access'];
+
+        update_memberships($options_array);
 
     } 
     
@@ -24,86 +27,64 @@ function lwmedia_admin_page(){
 	<div class="wrap">
 
     <h2>Restrict MetaFields</h2>
-
-<div class="lwadmin postbox-container" style="display:grid; width: 100%;">
-<!--
-<div class="postbox">
-<div class="inputforms">
+    <div class="container">
+   <?php $options = get_option('lightwebt_options_memberships'); ?>
 
 <form method="POST" action="<?php echo esc_html( admin_url( 'options-general.php?page=myplugin%2Fmyplugin-admin-page.php' ) );?>">
-<input type="hidden" value="true" name="lwmedia-save-options" />
-<?php wp_nonce_field('lwmedia-save-options'); ?>
-<select name="forbidden_fields[]" id="metafields" multiple>
-<?php get_all_metafields(); ?>
+<input type="hidden" value="true" name="lwmedia-save-memberships-options" />
+<label for="url">Redirect Url</label><input type="url" value="<?php echo $options['redirect_url']?>" name="redirect_url" />
+<label for="text_field">Text Field forbidden fields</label><input type="text" value="<?php echo $options['text_field']?>"  name="text_field" />
+<select name="membership_access[]" id="metafields" multiple>
+<?php get_all_memberschips(); ?>
 </select>
-<?php submit_button(__('Update forbidden Fields')); ?>
+<?php wp_nonce_field('lwmedia-save-memberships-options'); ?>
+<?php submit_button(__('Update Settings')); ?>
 
 </form>
 </div>
-<div class="result">
-<h3>Restricted Metafields:</h3>
-<?php $forbidden_fields =  get_option ('lightwebt_options_forbidden_metafields'); ?>
-<?php if($forbidden_fields): 
-   foreach ($forbidden_fields as $field):?>
+<div class="lwadmin postbox-container" style="width: 100%;">
 
-   <?php echo $field;?>
-   <?php endforeach;?>
-   <?php  endif?>
-</div>
-</div>
--->
 <?php 
-$memberships = get_all_memberschips();
-foreach($memberships as $id){
+$plans = wc_memberships_get_membership_plans();
+//var_dump($plans);
+foreach($plans as $plan){
     ?>
- <?php echo get_the_title($id)?>
+    <?php //var_dump ($id); ?>
+    <div class="container">
+ <?php echo get_the_title($plan->id)?>
+ <div class="result">
+
+<?php $forbidden_fields =  get_post_meta($plan->id,'_forbidden_metafields'); ?>
+
+<?php foreach($forbidden_fields as $values): ?>
+
+<?php if($values) echo implode(',',$values);?>
+<php } ?>
+
+<?php endforeach;?>
+</div>
     <form method="POST" action="<?php echo esc_html( admin_url( 'options-general.php?page=myplugin%2Fmyplugin-admin-page.php' ) );?>">
 <input type="hidden" value="true" name="lwmedia-save-options" />
+
 <?php wp_nonce_field('lwmedia-save-options'); ?>
+<input type="hidden" value="<?php echo $plan->id; ?>" name="membership_id" />
 <select name="forbidden_fields[]" id="metafields" multiple>
 <?php get_all_metafields(); ?>
 </select>
 <?php submit_button(__('Update forbidden Fields')); ?>
 
 </form>
+</div>
+
+
     <?php
 }
 ?>
-<div class="postbox">
 
-<div class="inputforms">
-<form method="POST" action="<?php echo esc_html( admin_url( 'options-general.php?page=myplugin%2Fmyplugin-admin-page.php' ) );?>" id="usrform">
-<input type="hidden" value="true" name="lwmedia-save-memberships-options" />
-<?php wp_nonce_field('lwmedia-save-memberships-options'); ?>
-<select name="memberschips[]" id="memberships" multiple>
-<?php get_all_memberschips(); ?>
-</select>
-
-<?php submit_button(__('Update forbidden Memberships')); ?>
-
-</form>
-</div>
-<div class="result">
-<?php $memberships =  get_option ('lightwebt_options_memberships'); ?>
-<h3>Restrict Metafields for Memberships:</h3>
-<?php if($memberships): 
-   foreach ($memberships as $id):?>
-
-   <?php echo get_the_title($id);?>
-   <?php endforeach;?>
-   <?php  endif?>
-</div>
-</div>
-</div>
 <style>
-.lwadmin .postbox {
-    min-height:25vh;
-    padding:20px;
-    display:flex;
+.lwadmin {
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
 }
 </style>
 <?php }
-
-/*
-TEST1234@test
-*/
