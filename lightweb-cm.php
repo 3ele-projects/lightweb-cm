@@ -153,18 +153,32 @@ function getpostmeta_filter($metadata, $object_id, $meta_key, $single){
 
 }
 
+add_action( 'pre_get_posts', 'modify_access_to_pages' );
 
+// Create a function to excplude some categories from the main query
+function modify_access_to_pages( $query ) {
+    if ( ! is_admin() && $query->is_main_query()  ){
+        if($query->query['listing_type']){
+            //var_dump($query);
+            $url = '../membership/';
+           $user_id = get_current_user_id();
+           $user_id = 88;
+            $args = array( 
+                'status' => array( 'active', 'complimentary', 'pending' ),
+            );  
+            
+            $active_memberships = wc_memberships_get_user_memberships( $user_id);
 
-
-
-function remove_post_with_empty_body ( $post ) {
-  $var =  get_post_meta($post->ID, '_case27_listing_type') ;   
-
-    if($var == 'tender'){
-    
-        add_filter( 'get_post_metadata', 'getpostmeta_filter', 100, 4 ); 
+       
+     
+            if ($user_id == 88){
+             //   wp_redirect( $url );
+//exit;
+            }
+        }
+return $query;
     }
+}
 
-    }
-add_action('the_post', 'remove_post_with_empty_body');
+
 
