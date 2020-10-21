@@ -70,7 +70,7 @@ function build_postmeta_key_array($post_id){
 }
 
 function check_if_user_id_is_in_groups ($user_id, $plan_id){
-    $user_id = 88;
+
     $active_membership = wc_memberships_get_user_memberships( $user_id);
 
     if($plan_id == $active_membership[0]->plan_id){
@@ -84,6 +84,24 @@ return true;
 
 
     }
+
+
+    function get_all_listing_types(){
+        $args = array(
+            'post_type' => 'case27_listing_type',
+            'posts_per_page' => '-1',
+            'post_status' => array( 'publish' )
+        );
+        $the_query = new WP_Query( $args );
+        $format = ' <option value="%s">%s</option>';
+        if ( $the_query->have_posts() ) {
+        while ( $the_query->have_posts() ) {
+            $the_query->the_post();
+            echo sprintf($format, get_the_ID(), get_the_title());
+        }
+    }
+    }
+    
 
 function get_all_metafields(){
 
@@ -144,8 +162,8 @@ function getpostmeta_filter($metadata, $object_id, $meta_key, $single){
     if(($fb_fields) && (!is_admin())){
     if (in_array ( $meta_key , $fb_fields)){
         //   var_dump($fb_fields);
+        
            $user_id = get_current_user_id();
-           $user_id = 88;
           if(check_if_user_id_is_in_groups ($user_id, $plan_id)){
      $options = get_option('lightwebt_options_memberships'); 
 $text = '<strong style="color:red;">'.$options['text_field'].'</strong>';
@@ -160,71 +178,47 @@ return $text;
 
 }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 78e1ce1ac32491888cbbc225a8d3e2c674ff6556
-add_action( 'pre_get_posts', 'modify_access_to_pages' );
-
-// Create a function to excplude some categories from the main query
-function modify_access_to_pages( $query ) {
-    if ( ! is_admin() && $query->is_main_query()  ){
-<<<<<<< HEAD
-        if($query->query['listing_type']){
-            //var_dump($query);
-            $url = '../membership/';
-           $user_id = get_current_user_id();
-           $user_id = 88;
-            $args = array( 
-                'status' => array( 'active', 'complimentary', 'pending' ),
-            );  
-            
-            $active_memberships = wc_memberships_get_user_memberships( $user_id);
-
-       
-     
-            if ($user_id == 88){
-             //   wp_redirect( $url );
-//exit;
-            }
-        }
-return $query;
-    }
-}
 
 
-=======
-        $user_id = 88;
 
+add_action( 'the_post', 'test' );
+
+function test($post){
+    $user_id = get_current_user_id();
     $active_memberships = wc_memberships_get_user_memberships( $user_id);
+
+    if($active_memberships):
     global $plan_id;
     $plan_id =  $active_memberships[0]->plan_id;
+    $forbidden_listing_types =  get_post_meta($plan_id,'_forbidden_listing_types');
     $forbidden_fields =  get_post_meta($plan_id,'_forbidden_metafields');
     global $fb_fields;
-
-    $fb_fields = $forbidden_fields[0];
-    if($fb_fields):
-     add_filter('get_post_metadata', 'getpostmeta_filter', 10, 4);
+    $options = get_option('lightwebt_options_memberships'); 
+    $creator_page_id = $options['creator_page_id'];
+    if($post->ID == $creator_page_id ) {
        
-    endif;
+        if (isset($_GET['listing_type'])) {
+            $listing_typ = $_GET['listing_type'];
+            $listing_obj = get_page_by_path($listing_typ , OBJECT, $post_type = 'case27_listing_type' );
 
+            if (in_array($listing_obj->ID,$forbidden_listing_types[0] )){
+                wp_redirect( $options['redirect_url'] );
+exit;
 
-  
-        if(isset($query->query['listing_type'])){
-            if($query->query_vars['listing_type'] == 'tender'){
-                $options = get_option('lightwebt_options_memberships'); 
-$membership_ids = $options['membership_access'];
-$url = $options['redirect_url'];
-if (!in_array ( $plan_id , $membership_ids)){
-    wp_redirect( $url );
-    exit;
-}
             }
->>>>>>> 78e1ce1ac32491888cbbc225a8d3e2c674ff6556
 
-           
-        } 	 
-    
-return $query;
-    }
+       
+
+          
+           // if (in_array($listing_type, ))
+         // } else {
+            //Handle the case where there is no parameter
+          }
 }
+
+
+$fb_fields = $forbidden_fields[0];
+add_filter('get_post_metadata', 'getpostmeta_filter', 10, 4);
+endif;
+}
+
