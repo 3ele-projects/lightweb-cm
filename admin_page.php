@@ -12,7 +12,6 @@ function lwmedia_admin_page(){
 
     }
     if (isset($_POST['lwmedia-save-memberships-options']) && check_admin_referer('lwmedia-save-memberships-options')) {
-  var_dump($_POST);
   $options_array = array();
   $options_array['text_field'] = $_POST['text_field'];
   $options_array['redirect_url'] = $_POST['redirect_url'];
@@ -79,6 +78,78 @@ foreach($plans as $plan){
 
     <?php
 }
+
+if( function_exists('acf_add_local_field_group') ):
+
+    acf_add_local_field_group(array(
+        'key' => 'group_5f8f51bd202d6',
+        'title' => 'test',
+        'fields' => array(
+            array(
+                'key' => 'field_5f8f51c345df0',
+                'label' => 'z',
+                'name' => 't',
+                'type' => 'relationship',
+                'instructions' => '',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'post_type' => '',
+                'taxonomy' => '',
+                'filters' => array(
+                    0 => 'search',
+                    1 => 'post_type',
+                    2 => 'taxonomy',
+                ),
+                'elements' => '',
+                'min' => '',
+                'max' => '',
+                'return_format' => 'object',
+            ),
+            array(
+                'key' => 'field_5f8f539752b2b',
+                'label' => 'kjlj',
+                'name' => 'kjljkjhk',
+                'type' => 'text',
+                'instructions' => '',
+                'required' => 0,
+                'conditional_logic' => 0,
+                'wrapper' => array(
+                    'width' => '',
+                    'class' => '',
+                    'id' => '',
+                ),
+                'default_value' => '',
+                'placeholder' => '',
+                'prepend' => '',
+                'append' => '',
+                'maxlength' => '',
+            ),
+        ),
+        'location' => array(
+            array(
+                array(
+                    'param' => 'post_type',
+                    'operator' => '==',
+                    'value' => 'post',
+                ),
+            ),
+        ),
+        'menu_order' => 0,
+        'position' => 'normal',
+        'style' => 'default',
+        'label_placement' => 'top',
+        'instruction_placement' => 'label',
+        'hide_on_screen' => '',
+        'active' => true,
+        'description' => '',
+    ));
+    
+    endif;
 ?>
 
 <style>

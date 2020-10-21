@@ -184,7 +184,6 @@ function modify_access_to_pages( $query ) {
   
         if(isset($query->query['listing_type'])){
             if($query->query_vars['listing_type'] == 'tender'){
-                var_dump($query->query_vars);
                 $options = get_option('lightwebt_options_memberships'); 
 $membership_ids = $options['membership_access'];
 $url = $options['redirect_url'];
@@ -195,7 +194,7 @@ if (!in_array ( $plan_id , $membership_ids)){
             }
 
            
-        }
+        } 	 
     
 return $query;
     }
