@@ -69,16 +69,18 @@ function build_postmeta_key_array($post_id){
         return $results;
 }
 
-function check_if_user_id_is_in_groups ($user_id){
+function check_if_user_id_is_in_groups ($user_id, $plan_id){
+    $user_id = 88;
+    $active_membership = wc_memberships_get_user_memberships( $user_id);
 
-    $memberships =  get_option ('lightwebt_options_memberships');
-      $membership_id = get_active_members_for_membership($user_id)[0];
-  
-      if (in_array ( $membership_id['ID'] ,  $memberships)){
-          return 'More information is only visible in the Gold and Platinum membership.';
-      } else {
-          return false;
-      }
+    if($plan_id == $active_membership[0]->plan_id){
+return true;
+    }
+    else {
+        return false;
+    }
+
+
 
 
     }
@@ -122,10 +124,10 @@ function get_all_memberschips(){
       
       
       $posts = get_posts( $args );
-    //  $format = ' <option value="%d">%s</option>';
+     $format = ' <option value="%d">%s</option>';
       foreach ($posts as $post){
 
-      //  echo sprintf($format, $post->ID, $post->post_title);
+        echo sprintf($format, $post->ID, $post->post_title);
 
       }
       return $posts;
@@ -134,18 +136,23 @@ function get_all_memberschips(){
 
 
 function getpostmeta_filter($metadata, $object_id, $meta_key, $single){
-   // var_dump(get_post_meta(get_the_ID(), '_case27_listing_type'));
 
-    $forbidden_fields =  get_option ('lightwebt_options_forbidden_metafields');
+    global $fb_fields;
+    global $plan_id;
 
-    if(($forbidden_fields) && (!is_admin())){
-    if (in_array ( $meta_key , $forbidden_fields)){
-       $user_id = get_current_user_id();
 
-       if(check_if_user_id_is_in_groups ($user_id)){
-          return check_if_user_id_is_in_groups($user_id);
-       };
-        
+    if(($fb_fields) && (!is_admin())){
+    if (in_array ( $meta_key , $fb_fields)){
+        //   var_dump($fb_fields);
+           $user_id = get_current_user_id();
+           $user_id = 88;
+          if(check_if_user_id_is_in_groups ($user_id, $plan_id)){
+     $options = get_option('lightwebt_options_memberships'); 
+$text = '<strong style="color:red;">'.$options['text_field'].'</strong>';
+return $text;
+          } else {
+            return $metadata;
+        } 
     }
 } else {
     return $metadata;
@@ -153,11 +160,16 @@ function getpostmeta_filter($metadata, $object_id, $meta_key, $single){
 
 }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 78e1ce1ac32491888cbbc225a8d3e2c674ff6556
 add_action( 'pre_get_posts', 'modify_access_to_pages' );
 
 // Create a function to excplude some categories from the main query
 function modify_access_to_pages( $query ) {
     if ( ! is_admin() && $query->is_main_query()  ){
+<<<<<<< HEAD
         if($query->query['listing_type']){
             //var_dump($query);
             $url = '../membership/';
@@ -181,4 +193,38 @@ return $query;
 }
 
 
+=======
+        $user_id = 88;
 
+    $active_memberships = wc_memberships_get_user_memberships( $user_id);
+    global $plan_id;
+    $plan_id =  $active_memberships[0]->plan_id;
+    $forbidden_fields =  get_post_meta($plan_id,'_forbidden_metafields');
+    global $fb_fields;
+
+    $fb_fields = $forbidden_fields[0];
+    if($fb_fields):
+     add_filter('get_post_metadata', 'getpostmeta_filter', 10, 4);
+       
+    endif;
+
+
+  
+        if(isset($query->query['listing_type'])){
+            if($query->query_vars['listing_type'] == 'tender'){
+                $options = get_option('lightwebt_options_memberships'); 
+$membership_ids = $options['membership_access'];
+$url = $options['redirect_url'];
+if (!in_array ( $plan_id , $membership_ids)){
+    wp_redirect( $url );
+    exit;
+}
+            }
+>>>>>>> 78e1ce1ac32491888cbbc225a8d3e2c674ff6556
+
+           
+        } 	 
+    
+return $query;
+    }
+}
